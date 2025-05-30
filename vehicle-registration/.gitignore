@@ -1,0 +1,30 @@
+# IntelliJ IDEA
+.idea
+*.iws
+*.iml
+*.ipr
+
+# Java build output
+/out/
+target/
+bin/
+build/
+
+# Logs
+*.log
+
+# Compiled class files
+*.class
+
+# Package distribution
+*.jar
+*.war
+*.ear
+
+# OS-specific
+.DS_Store
+
+# Eclipse files (if opened with Eclipse)
+.project
+.classpath
+.settings/
