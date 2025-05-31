@@ -29,6 +29,11 @@ public class DefaultVehicleRegistrationService implements VehicleRegistrationSer
 	}
 
 	@Override
+	public Optional<VehicleRegistration> getVehicleRegistrationForUser(final String registrationCode, final User user) {
+		return vehicleDao.findByRegistrationCodeAndUser(registrationCode, user);
+	}
+
+	@Override
 	public Map<String, Integer> getVehicleRegistrationPerUser() {
 		return vehicleDao.countVehicleRegistrationsPerUser();
 	}

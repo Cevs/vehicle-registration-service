@@ -25,35 +25,45 @@ public abstract class JsonHandler<T, R> implements HttpHandler {
 
 	@Override
 	public void handle(HttpExchange exchange) throws IOException {
-		// 1) Deserialize request
-		try (InputStream in = exchange.getRequestBody()) {
-			final T requestObject = JsonUtil.fromJson(in, requestType);
+		try {
+			// 1) Deserialize request, unless requestType == Void.class
+			T requestObject = null;
+			if (!Void.class.equals(requestType)) {
+				try (InputStream in = exchange.getRequestBody()) {
+					requestObject = JsonUtil.fromJson(in, requestType);
+				}
+			}
 
 			// 2) Delegate to subclass
 			final R responseObject = handleRequest(exchange, requestObject);
 
 			// 3) Serialize response
-			byte[] respBytes = JsonUtil.toJson(responseObject).getBytes(StandardCharsets.UTF_8);
+			byte[] respBytes = JsonUtil.toJson(responseObject)
+									   .getBytes(StandardCharsets.UTF_8);
 			exchange.getResponseHeaders()
-					.add(CONTENT_TYPE_HEADER_NAME, "application/json; charset=UTF-8");
-			if ("POST".equals(exchange.getRequestMethod()) || "PUT".equals(exchange.getRequestMethod())) {
+					.add(CONTENT_TYPE_HEADER_NAME, CONTENT_TYPE_HEADER_VALUE + "; charset=UTF-8");
+
+			String method = exchange.getRequestMethod();
+			if ("POST".equalsIgnoreCase(method) || "PUT".equalsIgnoreCase(method)) {
 				exchange.sendResponseHeaders(201, respBytes.length);
-			} else  {
+			} else {
 				exchange.sendResponseHeaders(200, respBytes.length);
 			}
 
 			try (OutputStream out = exchange.getResponseBody()) {
 				out.write(respBytes);
 			}
+
 		} catch (BadRequestException e) {
-			LOG.log(Level.WARNING, "Unsupported request received: %s ".formatted(e.getMessage()), e);
+			LOG.log(Level.WARNING, "Unsupported request received: {0}", e.getMessage());
 			sendError(exchange, 400, e.getMessage());
+
 		} catch (DuplicatedModelException e) {
 			sendError(exchange, 409, e.getObject());
-		} catch (Exception e) {
-			LOG.log(Level.SEVERE, "Issue occurred while handling request: %s ".formatted(e.getMessage()), e);
-			sendError(exchange, 500, "Internal error: %s".formatted(e.getMessage()));
 
+		} catch (Exception e) {
+			LOG.log(Level.SEVERE, "Issue occurred while handling request: {0}", e.getMessage());
+			sendError(exchange, 500, "Internal error: %s".formatted(e.getMessage()));
 		}
 	}
 

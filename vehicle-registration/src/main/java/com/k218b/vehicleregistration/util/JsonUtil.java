@@ -97,27 +97,29 @@ public class JsonUtil {
 		if (obj instanceof Map map) {
 			return toJson(map);
 		}
+
 		final StringBuilder sb = new StringBuilder();
 		sb.append("{");
 		final Class<?> clazz = obj.getClass();
 
 		final RecordComponent[] comps = clazz.getRecordComponents();
-		for (int i = 0; i < comps.length; i++) {
-			final RecordComponent rc = comps[i];
+		boolean first = true;
+
+		for (RecordComponent rc : comps) {
 			try {
-				final Object val = clazz.getMethod(rc.getAccessor().getName())
-										.invoke(obj);
+				final Object val = clazz.getMethod(rc.getAccessor().getName()).invoke(obj);
 				if (val != null) {
+					if (!first) {
+						sb.append(",");
+					}
 					sb.append("\"")
 					  .append(rc.getName())
 					  .append("\":")
 					  .append(quote(val));
+					first = false;
 				}
 			} catch (NoSuchMethodException | IllegalAccessException | InvocationTargetException e) {
 				throw new JsonSerializationException(clazz, rc.getName(), e);
-			}
-			if (i < comps.length - 1) {
-				sb.append(",");
 			}
 		}
 

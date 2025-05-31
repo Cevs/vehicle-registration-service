@@ -1,5 +1,5 @@
 package com.k218b.vehicleregistration.model;
 
-import java.util.Date;
+import java.time.LocalDate;
 
-public record VehicleRegistration(String registrationCode, Date validUntil, String accountId) {}
+public record VehicleRegistration(String registrationCode, LocalDate validUntil, String accountId) {}

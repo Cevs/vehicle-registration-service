@@ -1,7 +1,6 @@
 package com.k218b.vehicleregistration.dao.impl;
 
 import com.k218b.vehicleregistration.dao.VehicleRegistrationDao;
-import com.k218b.vehicleregistration.exception.UserNotFoundException;
 import com.k218b.vehicleregistration.model.User;
 import com.k218b.vehicleregistration.model.VehicleRegistration;
 import com.k218b.vehicleregistration.util.JDBCUtil;
@@ -11,6 +10,7 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.time.LocalDate;
+import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.Optional;
@@ -23,6 +23,8 @@ public class DefaultVehicleRegistrationDao implements VehicleRegistrationDao {
 
 	private static final String SELECT_BY_REGISTRATION_CODE =
 			"SELECT registration_code, valid_until, account_id FROM vehicle_registrations WHERE registration_code = ?";
+	private static final String SELECT_BY_REGISTRATION_CODE_AND_USER =
+			"SELECT registration_code, valid_until, account_id FROM vehicle_registrations WHERE registration_code = ? AND account_id = ?";
 	private static final String INSERT_VEHICLE_REGISTRATION =
 			"INSERT INTO vehicle_registrations(registration_code, valid_until, account_id) VALUES(?,?,?)";
 	private static final String COUNT_PER_ACCOUNT_SQL =
@@ -38,17 +40,18 @@ public class DefaultVehicleRegistrationDao implements VehicleRegistrationDao {
 				if (rs.next()) {
 					final VehicleRegistration vehicleRegistration = new VehicleRegistration(
 							rs.getString(1),
-							rs.getDate(2),
+							rs.getDate(2).toLocalDate(),
 							rs.getString(3)
 					);
 
 					return Optional.of(vehicleRegistration);
 				}
-				return Optional.empty();
 			}
 		} catch (SQLException e) {
-			throw new UserNotFoundException("Failed to retrieve Vehicle for registration_code=%s".formatted(registrationCode), e);
+			LOG.log(Level.SEVERE, "Issue occurred while retrieving Vehicle Registration for code: %s"
+					.formatted(registrationCode), e);
 		}
+		return Optional.empty();
 	}
 
 	@Override
@@ -72,7 +75,7 @@ public class DefaultVehicleRegistrationDao implements VehicleRegistrationDao {
 			 final PreparedStatement ps = conn.prepareStatement(COUNT_PER_ACCOUNT_SQL);
 			 final ResultSet rs = ps.executeQuery()) {
 
-			final Map<String, Integer> result = new LinkedHashMap<>();
+			final Map<String, Integer> result = new HashMap<>();
 			while (rs.next()) {
 				final String accountId = rs.getString("account_id");
 				final int count = rs.getInt("cnt");
@@ -83,8 +86,32 @@ public class DefaultVehicleRegistrationDao implements VehicleRegistrationDao {
 		} catch (SQLException e) {
 			LOG.log(Level.SEVERE, "Issue with fetching vehicle registrations numbers per account!", e);
 			return Map.of();
-
 		}
+	}
+
+	@Override
+	public Optional<VehicleRegistration> findByRegistrationCodeAndUser(final String registrationCode, final User user) {
+		try (final Connection conn = JDBCUtil.getConnection();
+			 final PreparedStatement ps = conn.prepareStatement(SELECT_BY_REGISTRATION_CODE_AND_USER)) {
+
+			ps.setString(1, registrationCode);
+			ps.setString(2, user.accountId());
+			try (final ResultSet rs = ps.executeQuery()) {
+				if (rs.next()) {
+					final VehicleRegistration vehicleRegistration = new VehicleRegistration(
+							rs.getString(1),
+							rs.getDate(2).toLocalDate(),
+							rs.getString(3)
+					);
+
+					return Optional.of(vehicleRegistration);
+				}
+			}
+		} catch (SQLException e) {
+			LOG.log(Level.SEVERE, "Issue occurred while retrieving Vehicle Registration for code: %s and user: %s"
+					.formatted(registrationCode, user.accountId()), e);
+		}
+		return Optional.empty();
 	}
 
 }

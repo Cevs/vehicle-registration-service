@@ -8,6 +8,7 @@ import com.k218b.vehicleregistration.dao.impl.DefaultVehicleRegistrationDao;
 import com.k218b.vehicleregistration.filter.BasicAuthFilter;
 import com.k218b.vehicleregistration.handler.AccountHandler;
 import com.k218b.vehicleregistration.handler.StatisticsHandler;
+import com.k218b.vehicleregistration.handler.UserHandler;
 import com.k218b.vehicleregistration.handler.VehicleRegistrationHandler;
 import com.k218b.vehicleregistration.service.UserService;
 import com.k218b.vehicleregistration.service.VehicleRegistrationService;
@@ -49,6 +50,7 @@ public class Main {
 		final AccountHandler accountHandler = new AccountHandler(userService);
 		final VehicleRegistrationHandler vehicleHandler = new VehicleRegistrationHandler(vehicleRegistrationService);
 		final StatisticsHandler statisticsHandler = new StatisticsHandler(vehicleRegistrationService);
+		final UserHandler userHandler = new UserHandler(vehicleRegistrationService);
 
 		server.setExecutor(createThreadPoolExecutor());
 		server.createContext("/account", accountHandler);
@@ -56,6 +58,9 @@ public class Main {
 			  .getFilters()
 			  .add(basicAuthFilter);
 		server.createContext("/statistics/accountID", statisticsHandler)
+			  .getFilters()
+			  .add(basicAuthFilter);
+		server.createContext("/registration/registrationCode", userHandler)
 			  .getFilters()
 			  .add(basicAuthFilter);
 

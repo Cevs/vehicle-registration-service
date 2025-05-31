@@ -59,4 +59,19 @@ public interface VehicleRegistrationDao {
 	 */
 	Map<String, Integer> countVehicleRegistrationsPerUser();
 
+	/**
+	 * Searches for a vehicle registration by its code and associated user.
+	 * <p>
+	 * This method is used to ensure that a vehicle registration belongs to a specific
+	 * user. It performs a lookup based on both the registration code and the user’s identity.
+	 * If a match is found, the corresponding {@link VehicleRegistration} is returned;
+	 * otherwise, an empty {@link Optional} is returned.
+	 * </p>
+	 *
+	 * @param registrationCode the unique vehicle registration code to search for
+	 * @param user             the user who should be the owner of the vehicle registration
+	 * @return an {@link Optional} containing the {@link VehicleRegistration} if found and
+	 *         associated with the specified user, or {@link Optional#empty()} if not found or not associated
+	 */
+	Optional<VehicleRegistration> findByRegistrationCodeAndUser(String registrationCode, User user);
 }

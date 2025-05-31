@@ -39,4 +39,18 @@ public final class DateUtil {
 		}
 	}
 
+	/**
+	 * Formats a {@link LocalDate} into a string using the ISO format (YYYY-MM-DD).
+	 *
+	 * @param date the {@link LocalDate} to format
+	 * @return a string representation in ISO format (e.g. "2025-12-31")
+	 * @throws IllegalArgumentException if the date is null
+	 */
+	public static String formatIsoDate(LocalDate date) {
+		if (date == null) {
+			throw new IllegalArgumentException("LocalDate must be non-null");
+		}
+		return date.format(ISO_DATE_FORMATTER);
+	}
+
 }

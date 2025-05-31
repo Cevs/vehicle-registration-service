@@ -1,5 +1,6 @@
 package com.k218b.vehicleregistration.service;
 
+import com.k218b.vehicleregistration.model.User;
 import com.k218b.vehicleregistration.model.VehicleRegistration;
 import java.time.LocalDate;
 import java.util.Map;
@@ -44,7 +45,24 @@ public interface VehicleRegistrationService {
 	 * @return an {@link Optional} containing the matching {@link VehicleRegistration}
 	 *         if found and accessible by the user, or {@code Optional.empty()} otherwise
 	 */
-	Optional<VehicleRegistration> getVehicleRegistration(String registrationCode);
+	Optional<VehicleRegistration> getVehicleRegistration(final String registrationCode);
+
+	/**
+	 * Retrieves a vehicle registration for a specific user by registration code.
+	 * <p>
+	 * This method looks up the {@link VehicleRegistration} associated with the given
+	 * registration code and user. It is typically used in administrative or system-level
+	 * operations where user-specific access checks need to be enforced or bypassed.
+	 * If the registration exists and is associated with the specified user, it is returned.
+	 * Otherwise, an empty {@link Optional} is returned.
+	 * </p>
+	 *
+	 * @param registrationCode the unique vehicle registration code to search for
+	 * @param user             the user associated with the vehicle registration
+	 * @return an {@link Optional} containing the matching {@link VehicleRegistration}
+	 *         if found and associated with the provided user, or {@code Optional.empty()} otherwise
+	 */
+	Optional<VehicleRegistration> getVehicleRegistrationForUser(final String registrationCode, final User user);
 
 	/**
 	 * Retrieves the count of vehicle registrations grouped by account ID.
