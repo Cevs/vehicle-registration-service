@@ -2,7 +2,7 @@ package com.k218b.vehicleregistration.dao.impl;
 
 import com.k218b.vehicleregistration.dao.UserDao;
 import com.k218b.vehicleregistration.exception.UserCreationException;
-import com.k218b.vehicleregistration.exception.UserSearchException;
+import com.k218b.vehicleregistration.exception.UserNotFoundException;
 import com.k218b.vehicleregistration.model.User;
 import com.k218b.vehicleregistration.util.JDBCUtil;
 
@@ -15,12 +15,12 @@ import java.util.Optional;
 public class DefaultUserDao implements UserDao {
 
 	private static final String SELECT_BY_ID =
-			"SELECT account_id, password_hash, salt FROM accounts WHERE account_id = ?";
+			"SELECT account_id, password_hash, salt FROM users WHERE account_id = ?";
 	private static final String INSERT_ACCOUNT =
-			"INSERT INTO accounts(account_id, password_hash, salt) VALUES(?,?,?)";
+			"INSERT INTO users(account_id, password_hash, salt) VALUES(?,?,?)";
 
 	@Override
-	public Optional<User> findByAccountId(String accountId) throws UserSearchException {
+	public Optional<User> findByAccountId(String accountId) throws UserNotFoundException {
 		try (final Connection conn = JDBCUtil.getConnection();
 			 final PreparedStatement ps = conn.prepareStatement(SELECT_BY_ID)) {
 
@@ -38,7 +38,7 @@ public class DefaultUserDao implements UserDao {
 				return Optional.empty();
 			}
 		} catch (SQLException e) {
-			throw new UserSearchException("Failed to retrieve user for accountId=%s".formatted(accountId), e);
+			throw new UserNotFoundException("Failed to retrieve user for accountId=%s".formatted(accountId), e);
 		}
 	}
 

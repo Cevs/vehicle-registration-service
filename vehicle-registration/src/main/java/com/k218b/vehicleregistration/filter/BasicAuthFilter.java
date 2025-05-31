@@ -1,11 +1,11 @@
 package com.k218b.vehicleregistration.filter;
 
+import com.k218b.vehicleregistration.context.SessionContext;
 import com.k218b.vehicleregistration.model.User;
 import com.k218b.vehicleregistration.service.UserService;
 import com.k218b.vehicleregistration.util.CryptoUtil;
 import com.sun.net.httpserver.Filter;
 import com.sun.net.httpserver.HttpExchange;
-
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.util.Base64;
@@ -24,7 +24,7 @@ import java.util.Optional;
 public class BasicAuthFilter extends Filter {
 	private final UserService userService;
 
-	public BasicAuthFilter(UserService userService) {
+	public BasicAuthFilter(final UserService userService) {
 		this.userService = userService;
 	}
 
@@ -35,6 +35,15 @@ public class BasicAuthFilter extends Filter {
 
 	@Override
 	public void doFilter(HttpExchange exchange, Chain chain) throws IOException {
+		try {
+			internalDoFilter(exchange, chain);
+		} finally {
+			SessionContext.clear();
+		}
+
+	}
+
+	private void internalDoFilter(HttpExchange exchange, Chain chain) throws IOException {
 		String authHeader = exchange.getRequestHeaders().getFirst("Authorization");
 
 		// 1. Verify header presence and format
@@ -60,13 +69,17 @@ public class BasicAuthFilter extends Filter {
 		final String accountId = parts[0];
 		final String presentedPassword = parts[1];
 
-		// 4. Verify against stored password
-		if (!authenticate(accountId, presentedPassword)) {
+
+		// 4) Fetch stored hash and salt, re‐hash presented, compare
+		// If valida, load a full User object
+		User user = authenticateAndLoadUser(accountId, presentedPassword);
+		if (user == null) {
 			sendUnauthorized(exchange);
 			return;
 		}
 
 		// 5. Auth succeeded; proceed
+		SessionContext.setCurrentUser(user);
 		chain.doFilter(exchange);
 	}
 
@@ -96,13 +109,13 @@ public class BasicAuthFilter extends Filter {
 		return new String[] { accountId, password };
 	}
 
-	private boolean authenticate(String accountId, String password) {
+	private User authenticateAndLoadUser(String accountId, String password) {
 		String storedHashedPassword;
 		String storedSalt;
 		try {
 			final Optional<User> userOptional = userService.getUser(accountId);
 			if (userOptional.isEmpty()) {
-				return false;
+				return null;
 			}
 			final User user = userOptional.get();
 			storedHashedPassword = user.password();
@@ -110,10 +123,13 @@ public class BasicAuthFilter extends Filter {
 
 		} catch (Exception _) {
 			// Unexpected error (e.g. data access)
-			return false;
+			return null;
 		}
 
-		return storedHashedPassword.equals(CryptoUtil.hashPassword(password, storedSalt));
+		if (!storedHashedPassword.equals(CryptoUtil.hashPassword(password, storedSalt))) {
+			return null;
+		}
+		return userService.getUser(accountId).orElse(null);
 	}
 
 	private void sendUnauthorized(HttpExchange exchange) throws IOException {

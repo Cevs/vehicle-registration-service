@@ -37,20 +37,32 @@ public class JDBCUtil {
 	 * Ignores "already exists" errors.
 	 */
 	public static void initDatabase() {
-		String ddl = "CREATE TABLE accounts ("
-					 + " account_id VARCHAR(100) PRIMARY KEY,"
-					 + " password_hash VARCHAR(512) NOT NULL,"
-					 + " salt VARCHAR(64) NOT NULL"
-					 + ")";
+		final String createAccountsDDL =
+				"CREATE TABLE users ("
+				+ " account_id VARCHAR(100) PRIMARY KEY,"
+				+ " password_hash VARCHAR(512) NOT NULL,"
+				+ " salt VARCHAR(64) NOT NULL"
+				+ ")";
+
+		String createVehiclesDDL =
+				"CREATE TABLE vehicle_registrations ("
+				+ "  registration_code VARCHAR(100) PRIMARY KEY,"
+				+ "  valid_until DATE NOT NULL,"
+				+ "  account_id VARCHAR(100) NOT NULL,"
+				+ "  CONSTRAINT fk_owner FOREIGN KEY(account_id) "
+				+ "    REFERENCES users(account_id)"
+				+ ")";
+
 		try (Connection conn = getConnection();
 			 Statement stmt = conn.createStatement()) {
-			stmt.executeUpdate(ddl);
+			stmt.executeUpdate(createAccountsDDL);
+			stmt.executeUpdate(createVehiclesDDL);
 		} catch (SQLException e) {
 			// ignore "table already exists" errors: SQLState 42Y55 or error code -5501
 			String state = e.getSQLState();
 			int code = e.getErrorCode();
 			if (!"42Y55".equals(state) && code != -5501) {
-				throw new RuntimeException("DB init failed", e);
+//				throw new RuntimeException("DB init failed", e);
 			}
 		}
 	}

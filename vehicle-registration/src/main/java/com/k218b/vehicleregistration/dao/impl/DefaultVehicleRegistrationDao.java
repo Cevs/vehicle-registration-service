@@ -1,0 +1,65 @@
+package com.k218b.vehicleregistration.dao.impl;
+
+import com.k218b.vehicleregistration.dao.VehicleRegistrationDao;
+import com.k218b.vehicleregistration.exception.UserNotFoundException;
+import com.k218b.vehicleregistration.model.User;
+import com.k218b.vehicleregistration.model.VehicleRegistration;
+import com.k218b.vehicleregistration.util.JDBCUtil;
+import java.sql.Connection;
+import java.sql.Date;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import java.sql.SQLException;
+import java.time.LocalDate;
+import java.util.Optional;
+import java.util.logging.Level;
+import java.util.logging.Logger;
+
+public class DefaultVehicleRegistrationDao implements VehicleRegistrationDao {
+
+	private static final Logger LOG = Logger.getLogger(DefaultVehicleRegistrationDao.class.getName());
+
+	private static final String SELECT_BY_REGISTRATION_CODE =
+			"SELECT registration_code, valid_until, account_id FROM vehicle_registrations WHERE registration_code = ?";
+	private static final String INSERT_VEHICLE_REGISTRATION =
+			"INSERT INTO vehicle_registrations(registration_code, valid_until, account_id) VALUES(?,?,?)";
+
+	@Override
+	public Optional<VehicleRegistration> findByRegistrationCode(final String registrationCode) {
+		try (final Connection conn = JDBCUtil.getConnection();
+			 final PreparedStatement ps = conn.prepareStatement(SELECT_BY_REGISTRATION_CODE)) {
+
+			ps.setString(1, registrationCode);
+			try (final ResultSet rs = ps.executeQuery()) {
+				if (rs.next()) {
+					final VehicleRegistration vehicleRegistration = new VehicleRegistration(
+							rs.getString(1),
+							rs.getDate(2),
+							rs.getString(3)
+					);
+
+					return Optional.of(vehicleRegistration);
+				}
+				return Optional.empty();
+			}
+		} catch (SQLException e) {
+			throw new UserNotFoundException("Failed to retrieve Vehicle for registration_code=%s".formatted(registrationCode), e);
+		}
+	}
+
+	@Override
+	public boolean saveVehicleRegistration(final String registrationCode, final LocalDate validUntil, final User user) {
+		try (final Connection conn = JDBCUtil.getConnection();
+			 final PreparedStatement ps = conn.prepareStatement(INSERT_VEHICLE_REGISTRATION)) {
+			ps.setString(1, registrationCode);
+			ps.setDate(2, Date.valueOf(validUntil));
+			ps.setString(3, user.accountId());
+			ps.executeUpdate();
+			return true;
+		} catch (SQLException e) {
+			LOG.log(Level.SEVERE, "Issue with persisting Vehicle Registration: %s ".formatted(registrationCode), e);
+			return false;
+		}
+	}
+
+}

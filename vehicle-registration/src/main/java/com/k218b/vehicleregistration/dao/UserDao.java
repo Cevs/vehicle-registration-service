@@ -2,7 +2,7 @@ package com.k218b.vehicleregistration.dao;
 
 import com.k218b.vehicleregistration.dao.impl.DefaultUserDao;
 import com.k218b.vehicleregistration.exception.UserCreationException;
-import com.k218b.vehicleregistration.exception.UserSearchException;
+import com.k218b.vehicleregistration.exception.UserNotFoundException;
 import com.k218b.vehicleregistration.model.User;
 import java.util.Optional;
 
@@ -20,9 +20,9 @@ public interface UserDao {
 	 *
 	 * @param accountId the unique identifier of the user account
 	 * @return an {@link Optional} containing the {@link User} if found, or empty if no matching user exists
-	 * @throws UserSearchException if an error occurs while searching for the user
+	 * @throws UserNotFoundException if an error occurs while searching for the user
 	 */
-	Optional<User> findByAccountId(String accountId) throws UserSearchException;
+	Optional<User> findByAccountId(String accountId) throws UserNotFoundException;
 
 	/**
 	 * Persists a new user with the given account ID, password hash, and salt.

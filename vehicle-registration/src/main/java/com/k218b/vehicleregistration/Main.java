@@ -2,11 +2,16 @@ package com.k218b.vehicleregistration;
 
 import com.k218b.vehicleregistration.config.AppConfig;
 import com.k218b.vehicleregistration.dao.UserDao;
+import com.k218b.vehicleregistration.dao.VehicleRegistrationDao;
 import com.k218b.vehicleregistration.dao.impl.DefaultUserDao;
+import com.k218b.vehicleregistration.dao.impl.DefaultVehicleRegistrationDao;
 import com.k218b.vehicleregistration.filter.BasicAuthFilter;
 import com.k218b.vehicleregistration.handler.AccountHandler;
+import com.k218b.vehicleregistration.handler.VehicleRegistrationHandler;
 import com.k218b.vehicleregistration.service.UserService;
+import com.k218b.vehicleregistration.service.VehicleRegistrationService;
 import com.k218b.vehicleregistration.service.impl.DefaultUserService;
+import com.k218b.vehicleregistration.service.impl.DefaultVehicleRegistrationService;
 import com.k218b.vehicleregistration.util.I18nUtil;
 import com.k218b.vehicleregistration.util.JDBCUtil;
 import com.sun.net.httpserver.HttpServer;
@@ -36,12 +41,18 @@ public class Main {
 
 		final UserDao userDao = new DefaultUserDao();
 		final UserService userService = new DefaultUserService(userDao);
+		final VehicleRegistrationDao vehicleDao = new DefaultVehicleRegistrationDao();
+		final VehicleRegistrationService vehicleService = new DefaultVehicleRegistrationService(vehicleDao);
 		final BasicAuthFilter basicAuthFilter = new BasicAuthFilter(userService);
 
 		final AccountHandler accountHandler = new AccountHandler(userService);
+		final VehicleRegistrationHandler vehicleHandler = new VehicleRegistrationHandler(vehicleService);
 
 		server.setExecutor(createThreadPoolExecutor());
 		server.createContext("/account", accountHandler);
+		server.createContext("/register", vehicleHandler)
+			  .getFilters()
+			  .add(basicAuthFilter);
 
 		server.start();
 		LOG.log(Level.INFO,"Server started on http://localhost:8080");
