@@ -3,6 +3,7 @@ package com.k218b.vehicleregistration.dao;
 import com.k218b.vehicleregistration.model.User;
 import com.k218b.vehicleregistration.model.VehicleRegistration;
 import java.time.LocalDate;
+import java.util.Map;
 import java.util.Optional;
 
 /**
@@ -43,5 +44,19 @@ public interface VehicleRegistrationDao {
 	 *         {@code false} if a duplicate registration exists or persisting failed
 	 */
 	boolean saveVehicleRegistration(String registrationCode, LocalDate validUntil, User user);
+
+	/**
+	 * Retrieves the total number of vehicle registrations for each user.
+	 * <p>
+	 * Executes a query that groups all entries in the `vehicle_registrations`
+	 * table by `account_id` and returns a map where each key is an account ID
+	 * and its value is the count of registrations associated with that account.
+	 * Accounts that have no registrations will not appear in the returned map.
+	 * </p>
+	 *
+	 * @return a {@code Map<String,Integer>} mapping each account ID to the number
+	 *         of vehicle registrations they own
+	 */
+	Map<String, Integer> countVehicleRegistrationsPerUser();
 
 }

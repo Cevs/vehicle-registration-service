@@ -11,6 +11,8 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.time.LocalDate;
+import java.util.LinkedHashMap;
+import java.util.Map;
 import java.util.Optional;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -23,6 +25,8 @@ public class DefaultVehicleRegistrationDao implements VehicleRegistrationDao {
 			"SELECT registration_code, valid_until, account_id FROM vehicle_registrations WHERE registration_code = ?";
 	private static final String INSERT_VEHICLE_REGISTRATION =
 			"INSERT INTO vehicle_registrations(registration_code, valid_until, account_id) VALUES(?,?,?)";
+	private static final String COUNT_PER_ACCOUNT_SQL =
+			"SELECT account_id, COUNT(*) AS cnt FROM vehicle_registrations GROUP BY account_id";
 
 	@Override
 	public Optional<VehicleRegistration> findByRegistrationCode(final String registrationCode) {
@@ -59,6 +63,27 @@ public class DefaultVehicleRegistrationDao implements VehicleRegistrationDao {
 		} catch (SQLException e) {
 			LOG.log(Level.SEVERE, "Issue with persisting Vehicle Registration: %s ".formatted(registrationCode), e);
 			return false;
+		}
+	}
+
+	@Override
+	public Map<String, Integer> countVehicleRegistrationsPerUser() {
+		try (final Connection conn = JDBCUtil.getConnection();
+			 final PreparedStatement ps = conn.prepareStatement(COUNT_PER_ACCOUNT_SQL);
+			 final ResultSet rs = ps.executeQuery()) {
+
+			final Map<String, Integer> result = new LinkedHashMap<>();
+			while (rs.next()) {
+				final String accountId = rs.getString("account_id");
+				final int count = rs.getInt("cnt");
+				result.put(accountId, count);
+			}
+			return result;
+
+		} catch (SQLException e) {
+			LOG.log(Level.SEVERE, "Issue with fetching vehicle registrations numbers per account!", e);
+			return Map.of();
+
 		}
 	}
 

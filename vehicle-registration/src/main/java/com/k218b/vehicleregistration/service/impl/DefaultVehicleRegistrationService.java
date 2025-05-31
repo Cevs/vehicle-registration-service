@@ -6,6 +6,7 @@ import com.k218b.vehicleregistration.model.User;
 import com.k218b.vehicleregistration.model.VehicleRegistration;
 import com.k218b.vehicleregistration.service.VehicleRegistrationService;
 import java.time.LocalDate;
+import java.util.Map;
 import java.util.Optional;
 
 public class DefaultVehicleRegistrationService implements VehicleRegistrationService {
@@ -25,6 +26,11 @@ public class DefaultVehicleRegistrationService implements VehicleRegistrationSer
 	@Override
 	public Optional<VehicleRegistration> getVehicleRegistration(final String registrationCode) {
 		return vehicleDao.findByRegistrationCode(registrationCode);
+	}
+
+	@Override
+	public Map<String, Integer> getVehicleRegistrationPerUser() {
+		return vehicleDao.countVehicleRegistrationsPerUser();
 	}
 
 }

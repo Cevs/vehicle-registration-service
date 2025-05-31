@@ -94,6 +94,9 @@ public class JsonUtil {
 	 * @throws JsonSerializationException if reflection fails or an unsupported type is encountered
 	 */
 	public static String toJson(Object obj) {
+		if (obj instanceof Map map) {
+			return toJson(map);
+		}
 		final StringBuilder sb = new StringBuilder();
 		sb.append("{");
 		final Class<?> clazz = obj.getClass();
@@ -118,6 +121,43 @@ public class JsonUtil {
 			}
 		}
 
+		sb.append("}");
+		return sb.toString();
+	}
+
+	/**
+	 * Serialize a Map&lt;String, ?&gt; to a flat JSON object. Each key is used as a JSON property name
+	 * and quoted. Values are obtained via {@code toString()}, wrapped in quotes if they are String.
+	 * <p>
+	 * Example: If the map contains {"a@x":10, "b@y":"hello"}, returns:
+	 * {"a@x":10,"b@y":"hello"}
+	 * </p>
+	 *
+	 * @param map the map to serialize (non-null)
+	 * @return a JSON string representing the map as an object
+	 */
+	public static String toJson(Map<String, ?> map) {
+		final StringBuilder sb = new StringBuilder();
+		sb.append("{");
+		boolean first = true;
+		for (Map.Entry<String, ?> entry : map.entrySet()) {
+			if (!first) sb.append(",");
+			first = false;
+			String key = entry.getKey();
+			Object value = entry.getValue();
+			// Quote key
+			String keyEscaped = key.replace("\\", "\\\\").replace("\"", "\\\"");
+			sb.append("\"").append(keyEscaped).append("\":");
+			// Quote value if String, else use toString()
+			if (value instanceof String string) {
+				String v = string.replace("\\", "\\\\").replace("\"", "\\\"");
+				sb.append("\"").append(v).append("\"");
+			} else if (value == null) {
+				sb.append("null");
+			} else {
+				sb.append(value.toString());
+			}
+		}
 		sb.append("}");
 		return sb.toString();
 	}

@@ -21,10 +21,8 @@ public class VehicleRegistrationHandler extends JsonHandler<VehicleRegistrationR
 	@Override
 	protected VehicleRegistrationResponse handleRequest(final HttpExchange exchange, final VehicleRegistrationRequest request) {
 		if (!"POST".equalsIgnoreCase(exchange.getRequestMethod())) {
-			throw new BadRequestException("Only POST allowed");
+			throw new BadRequestException("HTTP method: %s not supported".formatted(exchange.getRequestMethod()));
 		}
-
-		//TODO: improve handling of responses
 
 		final String registrationCode = request.registrationCode();
 		final Optional<VehicleRegistration> vehicleRegistrationOptional = vehicleRegistrationService.getVehicleRegistration(registrationCode);
@@ -40,7 +38,7 @@ public class VehicleRegistrationHandler extends JsonHandler<VehicleRegistrationR
 
 		if (registrationSuccess) {
 			return new VehicleRegistrationResponse(true,
-												   "Vehicle registration: %s is successfully added.".formatted(request.registrationCode()));
+												   "Vehicle registration: %s already exists in the system!".formatted(request.registrationCode()));
 		}
 		return new VehicleRegistrationResponse(false,
 											   "Vehicle registration: %s is not added.".formatted(request.registrationCode()));

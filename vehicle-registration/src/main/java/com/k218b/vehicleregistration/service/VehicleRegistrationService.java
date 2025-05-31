@@ -2,6 +2,7 @@ package com.k218b.vehicleregistration.service;
 
 import com.k218b.vehicleregistration.model.VehicleRegistration;
 import java.time.LocalDate;
+import java.util.Map;
 import java.util.Optional;
 
 /**
@@ -44,4 +45,17 @@ public interface VehicleRegistrationService {
 	 *         if found and accessible by the user, or {@code Optional.empty()} otherwise
 	 */
 	Optional<VehicleRegistration> getVehicleRegistration(String registrationCode);
+
+	/**
+	 * Retrieves the count of vehicle registrations grouped by account ID.
+	 * <p>
+	 * Returns a map where each key is an account ID (String) and each value is
+	 * the number of vehicle registrations associated with that account. Accounts
+	 * with zero registrations will not appear in the returned map.
+	 * </p>
+	 *
+	 * @return a {@code Map<String, Integer>} mapping each account ID to its total
+	 *         number of vehicle registrations
+	 */
+	Map<String, Integer> getVehicleRegistrationPerUser();
 }

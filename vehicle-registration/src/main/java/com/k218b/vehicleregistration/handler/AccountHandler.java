@@ -20,7 +20,7 @@ public class AccountHandler extends JsonHandler<CreateAccountRequest, OpenAccoun
 	@Override
 	protected OpenAccountResponse handleRequest(final HttpExchange exchange, final CreateAccountRequest request) {
 		if (!"POST".equalsIgnoreCase(exchange.getRequestMethod())) {
-			throw new BadRequestException("Only POST allowed");
+			throw new BadRequestException("HTTP method: %s not supported".formatted(exchange.getRequestMethod()));
 		}
 
 		// Validate that accountId is provided
