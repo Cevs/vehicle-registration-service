@@ -1,6 +1,7 @@
 package com.k218b.vehicleregistration.handler;
 
 import com.k218b.vehicleregistration.exception.BadRequestException;
+import com.k218b.vehicleregistration.exception.DuplicatedModelException;
 import com.k218b.vehicleregistration.util.JsonUtil;
 import com.sun.net.httpserver.HttpExchange;
 import com.sun.net.httpserver.HttpHandler;
@@ -14,6 +15,8 @@ import java.util.logging.Logger;
 public abstract class JsonHandler<T, R> implements HttpHandler {
 
 	private static final Logger LOG = Logger.getLogger(JsonHandler.class.getName());
+	public static final String CONTENT_TYPE_HEADER_NAME = "Content-Type";
+	public static final String CONTENT_TYPE_HEADER_VALUE = "application/json";
 	private final Class<T> requestType;
 
 	protected JsonHandler(Class<T> requestType) {
@@ -30,20 +33,26 @@ public abstract class JsonHandler<T, R> implements HttpHandler {
 			final R responseObject = handleRequest(exchange, requestObject);
 
 			// 3) Serialize response
-			byte[] respBytes = JsonUtil.toJson(responseObject)
-									   .getBytes(StandardCharsets.UTF_8);
+			byte[] respBytes = JsonUtil.toJson(responseObject).getBytes(StandardCharsets.UTF_8);
 			exchange.getResponseHeaders()
-					.add("Content-Type", "application/json; charset=UTF-8");
-			exchange.sendResponseHeaders(200, respBytes.length);
+					.add(CONTENT_TYPE_HEADER_NAME, "application/json; charset=UTF-8");
+			if ("POST".equals(exchange.getRequestMethod()) || "PUT".equals(exchange.getRequestMethod())) {
+				exchange.sendResponseHeaders(201, respBytes.length);
+			} else  {
+				exchange.sendResponseHeaders(200, respBytes.length);
+			}
+
 			try (OutputStream out = exchange.getResponseBody()) {
 				out.write(respBytes);
 			}
 		} catch (BadRequestException e) {
 			LOG.log(Level.WARNING, "Unsupported request received: %s ".formatted(e.getMessage()), e);
 			sendError(exchange, 400, e.getMessage());
+		} catch (DuplicatedModelException e) {
+			sendError(exchange, 409, e.getObject());
 		} catch (Exception e) {
 			LOG.log(Level.SEVERE, "Issue occurred while handling request: %s ".formatted(e.getMessage()), e);
-			sendError(exchange, 500, "Internal error: " + e.getMessage());
+			sendError(exchange, 500, "Internal error: %s".formatted(e.getMessage()));
 
 		}
 	}
@@ -51,10 +60,19 @@ public abstract class JsonHandler<T, R> implements HttpHandler {
 	private void sendError(HttpExchange ex, int code, String msg) throws IOException {
 		final byte[] bytes = ("{\"error\":\"" + msg + "\"}")
 				.getBytes(StandardCharsets.UTF_8);
-		ex.getResponseHeaders().add("Content-Type", "application/json");
+		ex.getResponseHeaders().add(CONTENT_TYPE_HEADER_NAME, CONTENT_TYPE_HEADER_VALUE);
 		ex.sendResponseHeaders(code, bytes.length);
 		try (OutputStream out = ex.getResponseBody()) {
 			out.write(bytes);
+		}
+	}
+
+	private void sendError(HttpExchange ex, int code, Object object) throws IOException {
+		byte[] respBytes = JsonUtil.toJson(object).getBytes(StandardCharsets.UTF_8);
+		ex.getResponseHeaders().add(CONTENT_TYPE_HEADER_NAME, CONTENT_TYPE_HEADER_VALUE);
+		ex.sendResponseHeaders(code, respBytes.length);
+		try (OutputStream out = ex.getResponseBody()) {
+			out.write(respBytes);
 		}
 	}
 

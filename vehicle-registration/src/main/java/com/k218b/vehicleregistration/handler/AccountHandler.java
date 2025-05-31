@@ -2,6 +2,7 @@ package com.k218b.vehicleregistration.handler;
 
 import com.k218b.vehicleregistration.exception.BadRequestException;
 import com.k218b.vehicleregistration.exception.DuplicatedAccountException;
+import com.k218b.vehicleregistration.exception.DuplicatedModelException;
 import com.k218b.vehicleregistration.factory.OpenAccountResponseFactory;
 import com.k218b.vehicleregistration.request.CreateAccountRequest;
 import com.k218b.vehicleregistration.response.OpenAccountResponse;
@@ -33,7 +34,7 @@ public class AccountHandler extends JsonHandler<CreateAccountRequest, OpenAccoun
 			final String password = userService.openAccount(accountId);
 			return OpenAccountResponseFactory.success(exchange, accountId, password);
 		} catch (DuplicatedAccountException _) {
-			return OpenAccountResponseFactory.duplicate(exchange, request.accountId());
+			throw new DuplicatedModelException(OpenAccountResponseFactory.duplicate(exchange, request.accountId()));
 		}
 	}
 
