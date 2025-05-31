@@ -1,12 +1,8 @@
 package com.k218b.vehicleregistration.factory;
 
-
-import com.k218b.vehicleregistration.model.User;
 import com.k218b.vehicleregistration.response.OpenAccountResponse;
-import com.k218b.vehicleregistration.util.CryptoUtil;
 import com.k218b.vehicleregistration.util.I18nUtil;
 import com.sun.net.httpserver.HttpExchange;
-
 import java.util.Locale;
 
 public abstract class OpenAccountResponseFactory {
@@ -15,13 +11,13 @@ public abstract class OpenAccountResponseFactory {
 
 	private OpenAccountResponseFactory() {}
 
-	public static OpenAccountResponse success(HttpExchange ex, User user) {
+	public static OpenAccountResponse success(HttpExchange ex, String accountId, String password) {
 		final Locale locale = I18nUtil.resolveLocale(ex);
-		final String msg = I18nUtil.getMessage(locale, SUCCESS_KEY, user.accountId());
+		final String msg = I18nUtil.getMessage(locale, SUCCESS_KEY, accountId);
 		return OpenAccountResponse.builder()
 								  .success(true)
 								  .message(msg)
-								  .password(CryptoUtil.decrypt(user.password(), user.salt()))
+								  .password(password)
 								  .build();
 	}
 

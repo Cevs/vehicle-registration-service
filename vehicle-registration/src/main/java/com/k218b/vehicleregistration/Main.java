@@ -1,8 +1,11 @@
 package com.k218b.vehicleregistration;
 
 import com.k218b.vehicleregistration.config.AppConfig;
+import com.k218b.vehicleregistration.dao.UserDao;
 import com.k218b.vehicleregistration.dao.impl.DefaultUserDao;
+import com.k218b.vehicleregistration.filter.BasicAuthFilter;
 import com.k218b.vehicleregistration.handler.AccountHandler;
+import com.k218b.vehicleregistration.service.UserService;
 import com.k218b.vehicleregistration.service.impl.DefaultUserService;
 import com.k218b.vehicleregistration.util.I18nUtil;
 import com.k218b.vehicleregistration.util.JDBCUtil;
@@ -30,8 +33,16 @@ public class Main {
 
 	private static void initializeServer() throws IOException {
 		final HttpServer server = HttpServer.create(new InetSocketAddress(8080), 0);
+
+		final UserDao userDao = new DefaultUserDao();
+		final UserService userService = new DefaultUserService(userDao);
+		final BasicAuthFilter basicAuthFilter = new BasicAuthFilter(userService);
+
+		final AccountHandler accountHandler = new AccountHandler(userService);
+
 		server.setExecutor(createThreadPoolExecutor());
-		server.createContext("/account", new AccountHandler(new DefaultUserService(new DefaultUserDao())));
+		server.createContext("/account", accountHandler);
+
 		server.start();
 		LOG.log(Level.INFO,"Server started on http://localhost:8080");
 	}

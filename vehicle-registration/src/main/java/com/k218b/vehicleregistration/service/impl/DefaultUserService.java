@@ -20,7 +20,7 @@ public class DefaultUserService implements UserService {
 	}
 
 	@Override
-	public User openAccount(final String accountId) throws DuplicatedAccountException {
+	public String openAccount(final String accountId) throws DuplicatedAccountException {
 		final Optional<User> userOptional = userDao.findByAccountId(accountId);
 		if (userOptional.isPresent()) {
 			final String errMsg = "Account for given uid: %s already exists!".formatted(accountId);
@@ -28,10 +28,16 @@ public class DefaultUserService implements UserService {
 			throw new DuplicatedAccountException(errMsg);
 		}
 
+		final String randomPassword = CryptoUtil.generateRandomPassword();
 		final String salt = CryptoUtil.generateSalt();
-		final String hash = CryptoUtil.encrypt(CryptoUtil.generateRandomPassword(), salt);
+		final String hash = CryptoUtil.hashPassword(randomPassword, salt);
 		userDao.saveUser(accountId, hash, salt);
-		return new User(accountId, hash, salt);
+		return randomPassword;
+	}
+
+	@Override
+	public Optional<User> getUser(final String accountId) {
+		return userDao.findByAccountId(accountId);
 	}
 
 }

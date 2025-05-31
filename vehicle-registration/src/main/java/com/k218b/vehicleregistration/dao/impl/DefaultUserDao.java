@@ -12,13 +12,6 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.Optional;
 
-/**
- * Data Access Object for User entities.
- * <p>
- * Provides methods to retrieve User records from the database
- * by account ID.
- * </p>
- */
 public class DefaultUserDao implements UserDao {
 
 	private static final String SELECT_BY_ID =
@@ -28,13 +21,13 @@ public class DefaultUserDao implements UserDao {
 
 	@Override
 	public Optional<User> findByAccountId(String accountId) throws UserSearchException {
-		try (Connection conn = JDBCUtil.getConnection();
-			 PreparedStatement ps = conn.prepareStatement(SELECT_BY_ID)) {
+		try (final Connection conn = JDBCUtil.getConnection();
+			 final PreparedStatement ps = conn.prepareStatement(SELECT_BY_ID)) {
 
 			ps.setString(1, accountId);
 			try (ResultSet rs = ps.executeQuery()) {
 				if (rs.next()) {
-					User user = new User(
+					final User user = new User(
 							rs.getString(1),
 							rs.getString(2),
 							rs.getString(3)
@@ -49,18 +42,10 @@ public class DefaultUserDao implements UserDao {
 		}
 	}
 
-	/**
-	 * Persists a new account with its hashed password and salt.
-	 *
-	 * @param accountId    the unique identifier of the account
-	 * @param passwordHash the Base64-encoded password hash
-	 * @param salt         the Base64-encoded salt
-	 * @throws UserCreationException if an error when error persisting user occurs
-	 */
 	@Override
 	public void saveUser(String accountId, String passwordHash, String salt) throws UserCreationException{
-		try (Connection conn = JDBCUtil.getConnection();
-			 PreparedStatement ps = conn.prepareStatement(INSERT_ACCOUNT)) {
+		try (final Connection conn = JDBCUtil.getConnection();
+			 final PreparedStatement ps = conn.prepareStatement(INSERT_ACCOUNT)) {
 
 			ps.setString(1, accountId);
 			ps.setString(2, passwordHash);

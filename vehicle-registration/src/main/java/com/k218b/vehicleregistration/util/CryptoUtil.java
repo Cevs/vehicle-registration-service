@@ -1,97 +1,31 @@
 package com.k218b.vehicleregistration.util;
 
-import java.util.UUID;
-import javax.crypto.Cipher;
-import javax.crypto.spec.GCMParameterSpec;
-import javax.crypto.spec.SecretKeySpec;
-import java.nio.charset.StandardCharsets;
+import javax.crypto.SecretKeyFactory;
+import javax.crypto.spec.PBEKeySpec;
+import java.security.NoSuchAlgorithmException;
 import java.security.SecureRandom;
-import java.util.Arrays;
+import java.security.spec.InvalidKeySpecException;
 import java.util.Base64;
+import java.util.UUID;
 
 /**
- * Utility for symmetric encryption and decryption of text using AES/GCM.
+ * Utility for hashing passwords using PBKDF2WithHmacSHA256,
+ * and for generating cryptographic salts and random passwords.
  * <p>
- * Uses the provided salt (Base64-encoded 16-byte key) as the AES key.
- * Each encryption generates a random 12-byte IV. Ciphertext is Base64-encoded
- * in the form <code>IV||ciphertext</code>. Decryption reverses this process.
+ * The salt is generated as a 16-byte random value and Base64-encoded
+ * for storage. Password hashing uses 65536 iterations and a 128-bit key length.
  * </p>
- * <p>
- * AES/GCM provides authenticated encryption ensuring both confidentiality
- * and integrity of the data.</p>
  */
 public class CryptoUtil {
-
-	private static final String TRANSFORMATION = "AES/GCM/NoPadding";
-	private static final String ALGORITHM = "AES";
-	private static final int IV_LENGTH = 12; 				// bytes
-	private static final int TAG_LENGTH_BITS = 128;			// bits
-	private static final int SALT_LENGTH = 16;				// bytes
+	private static final String ALGORITHM = "PBKDF2WithHmacSHA256";
+	private static final int ITERATIONS = 65536;
+	private static final int KEY_LENGTH = 128; // bits
+	private static final int SALT_LENGTH = 16; // bytes
 	private static final int PASSWORD_LENGTH = 8;
 	private static final SecureRandom RANDOM = new SecureRandom();
 
-	private CryptoUtil() {}
-
-	/**
-	 * Encrypts the given plaintext using AES/GCM with a random IV.
-	 *
-	 * @param plaintext  the text to encrypt
-	 * @param salt the Base64-encoded 16-byte AES key
-	 * @return Base64-encoded string containing IV + ciphertext
-	 * @throws IllegalStateException if encryption fails
-	 */
-	public static String encrypt(String plaintext, String salt) {
-		try {
-			final byte[] keyBytes = Base64.getDecoder()
-										  .decode(salt);
-			final SecretKeySpec keySpec = new SecretKeySpec(keyBytes, ALGORITHM);
-
-			final byte[] iv = new byte[IV_LENGTH];
-			RANDOM.nextBytes(iv);
-			final GCMParameterSpec gcmSpec = new GCMParameterSpec(TAG_LENGTH_BITS, iv);
-
-			final Cipher cipher = Cipher.getInstance(TRANSFORMATION);
-			cipher.init(Cipher.ENCRYPT_MODE, keySpec, gcmSpec);
-			final byte[] encrypted = cipher.doFinal(plaintext.getBytes(StandardCharsets.UTF_8));
-
-			final byte[] combined = new byte[iv.length + encrypted.length];
-			System.arraycopy(iv, 0, combined, 0, iv.length);
-			System.arraycopy(encrypted, 0, combined, iv.length, encrypted.length);
-
-			return Base64.getEncoder().encodeToString(combined);
-		} catch (Exception e) {
-			throw new IllegalStateException("Error encrypting data", e);
-		}
-	}
-
-	/**
-	 * Decrypts the given Base64-encoded IV+ciphertext using AES/GCM.
-	 *
-	 * @param encryptedPassword the Base64-encoded IV + ciphertext
-	 * @param salt     the Base64-encoded 16-byte AES key
-	 * @return the decrypted plaintext
-	 * @throws IllegalStateException if decryption fails
-	 */
-	public static String decrypt(String encryptedPassword, String salt) {
-		try {
-			final byte[] combined = Base64.getDecoder()
-										  .decode(encryptedPassword);
-			final byte[] iv = Arrays.copyOfRange(combined, 0, IV_LENGTH);
-			final byte[] ciphertext = Arrays.copyOfRange(combined, IV_LENGTH, combined.length);
-
-			final byte[] keyBytes = Base64.getDecoder()
-										  .decode(salt);
-			final SecretKeySpec keySpec = new SecretKeySpec(keyBytes, ALGORITHM);
-			final GCMParameterSpec gcmSpec = new GCMParameterSpec(TAG_LENGTH_BITS, iv);
-
-			final Cipher cipher = Cipher.getInstance(TRANSFORMATION);
-			cipher.init(Cipher.DECRYPT_MODE, keySpec, gcmSpec);
-			final byte[] decrypted = cipher.doFinal(ciphertext);
-
-			return new String(decrypted, StandardCharsets.UTF_8);
-		} catch (Exception e) {
-			throw new IllegalStateException("Error decrypting data", e);
-		}
+	private CryptoUtil() {
+		// Utility class; prevent instantiation
 	}
 
 	/**
@@ -100,9 +34,39 @@ public class CryptoUtil {
 	 * @return the Base64-encoded salt
 	 */
 	public static String generateSalt() {
-		final byte[] salt = new byte[SALT_LENGTH];
+		byte[] salt = new byte[SALT_LENGTH];
 		RANDOM.nextBytes(salt);
 		return Base64.getEncoder().encodeToString(salt);
+	}
+
+	/**
+	 * Hashes the given password with the provided Base64-encoded salt using PBKDF2.
+	 *
+	 * @param password  the raw password to hash
+	 * @param saltBase64 the Base64-encoded salt
+	 * @return the Base64-encoded hashed password
+	 * @throws IllegalStateException if hashing fails or salt is invalid
+	 */
+	public static String hashPassword(String password, String saltBase64) {
+		try {
+			byte[] salt = Base64.getDecoder().decode(saltBase64);
+			if (salt.length != SALT_LENGTH) {
+				throw new IllegalArgumentException("Salt must be " + SALT_LENGTH + " bytes");
+			}
+			PBEKeySpec spec = new PBEKeySpec(
+					password.toCharArray(),
+					salt,
+					ITERATIONS,
+					KEY_LENGTH
+			);
+			SecretKeyFactory skf = SecretKeyFactory.getInstance(ALGORITHM);
+			byte[] hash = skf.generateSecret(spec).getEncoded();
+			return Base64.getEncoder().encodeToString(hash);
+		} catch (NoSuchAlgorithmException | InvalidKeySpecException e) {
+			throw new IllegalStateException("Error hashing password", e);
+		} catch (IllegalArgumentException e) {
+			throw new IllegalStateException("Invalid salt provided", e);
+		}
 	}
 
 	/**
@@ -112,11 +76,10 @@ public class CryptoUtil {
 	 * The resulting password contains hexadecimal digits (0-9, a-f).
 	 * </p>
 	 *
-	 * @return an 8-character password derived from a UUID
+	 * @return an 8-character random password derived from a UUID
 	 */
 	public static String generateRandomPassword() {
 		String uuid = UUID.randomUUID().toString().replace("-", "");
 		return uuid.substring(0, PASSWORD_LENGTH);
 	}
-
 }

@@ -2,6 +2,7 @@ package com.k218b.vehicleregistration.service;
 
 import com.k218b.vehicleregistration.exception.DuplicatedAccountException;
 import com.k218b.vehicleregistration.model.User;
+import java.util.Optional;
 
 public interface UserService {
 
@@ -12,8 +13,10 @@ public interface UserService {
 	 * is thrown.
 	 *
 	 * @param accountId the unique identifier for the account to open
-	 * @return the newly created {@link User}
+	 * @return the newly create password for a user
 	 * @throws DuplicatedAccountException if an account with that ID already exists
 	 */
-	User openAccount(String accountId) throws DuplicatedAccountException;
+	String openAccount(String accountId) throws DuplicatedAccountException;
+
+	Optional<User> getUser(String accountId);
 }
