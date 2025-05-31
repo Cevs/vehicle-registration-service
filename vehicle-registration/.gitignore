@@ -17,7 +17,6 @@ build/
 *.class
 
 # Package distribution
-*.jar
 *.war
 *.ear
 
@@ -28,3 +27,6 @@ build/
 .project
 .classpath
 .settings/
+
+# Database
+vrsdb.*

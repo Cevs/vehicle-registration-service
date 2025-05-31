@@ -3,6 +3,7 @@ package com.k218b.vehicleregistration.factory;
 
 import com.k218b.vehicleregistration.model.User;
 import com.k218b.vehicleregistration.response.OpenAccountResponse;
+import com.k218b.vehicleregistration.util.CryptoUtil;
 import com.k218b.vehicleregistration.util.I18nUtil;
 import com.sun.net.httpserver.HttpExchange;
 
@@ -20,7 +21,7 @@ public abstract class OpenAccountResponseFactory {
 		return OpenAccountResponse.builder()
 								  .success(true)
 								  .message(msg)
-								  .password(user.password())
+								  .password(CryptoUtil.decrypt(user.password(), user.salt()))
 								  .build();
 	}
 
