@@ -6,6 +6,7 @@ import com.k218b.vehicleregistration.dao.VehicleRegistrationDao;
 import com.k218b.vehicleregistration.dao.impl.DefaultUserDao;
 import com.k218b.vehicleregistration.dao.impl.DefaultVehicleRegistrationDao;
 import com.k218b.vehicleregistration.filter.BasicAuthFilter;
+import com.k218b.vehicleregistration.filter.CorsFilter;
 import com.k218b.vehicleregistration.handler.AccountHandler;
 import com.k218b.vehicleregistration.handler.StatisticsHandler;
 import com.k218b.vehicleregistration.handler.UserHandler;
@@ -16,11 +17,13 @@ import com.k218b.vehicleregistration.service.impl.DefaultUserService;
 import com.k218b.vehicleregistration.service.impl.DefaultVehicleRegistrationService;
 import com.k218b.vehicleregistration.util.I18nUtil;
 import com.k218b.vehicleregistration.util.JDBCUtil;
+import com.sun.net.httpserver.Filter;
 import com.sun.net.httpserver.HttpServer;
 import java.io.IOException;
 import java.net.InetSocketAddress;
 import java.sql.DriverManager;
 import java.sql.SQLException;
+import java.util.List;
 import java.util.Locale;
 import java.util.concurrent.ArrayBlockingQueue;
 import java.util.concurrent.Executors;
@@ -46,23 +49,28 @@ public class Main {
 		final VehicleRegistrationDao vehicleDao = new DefaultVehicleRegistrationDao();
 		final VehicleRegistrationService vehicleRegistrationService = new DefaultVehicleRegistrationService(vehicleDao);
 		final BasicAuthFilter basicAuthFilter = new BasicAuthFilter(userService);
+		final CorsFilter corsFilter = new CorsFilter();
 
 		final AccountHandler accountHandler = new AccountHandler(userService);
 		final VehicleRegistrationHandler vehicleHandler = new VehicleRegistrationHandler(vehicleRegistrationService);
 		final StatisticsHandler statisticsHandler = new StatisticsHandler(vehicleRegistrationService);
 		final UserHandler userHandler = new UserHandler(vehicleRegistrationService);
 
+		final List<Filter> generalFilters = List.of(corsFilter, basicAuthFilter);
+
 		server.setExecutor(createThreadPoolExecutor());
-		server.createContext("/account", accountHandler);
+		server.createContext("/account", accountHandler)
+			  .getFilters()
+			  .add(corsFilter);
 		server.createContext("/register", vehicleHandler)
 			  .getFilters()
-			  .add(basicAuthFilter);
+			  .addAll(generalFilters);
 		server.createContext("/statistics/accountID", statisticsHandler)
 			  .getFilters()
-			  .add(basicAuthFilter);
+			  .addAll(generalFilters);
 		server.createContext("/registration/registrationCode", userHandler)
 			  .getFilters()
-			  .add(basicAuthFilter);
+			  .addAll(generalFilters);
 
 		server.start();
 		LOG.log(Level.INFO,"Server started on http://localhost:8080");
