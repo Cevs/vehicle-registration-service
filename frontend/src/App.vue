@@ -1,28 +1,33 @@
+<!-- src/App.vue -->
 <template>
   <div id="app">
-    <main>
-      <AccountForm />
+    <Navigation />
+
+    <!-- Main content area: router-view will render either AccountForm or RegisterVehicle -->
+    <main class="main-content">
+      <router-view />
     </main>
   </div>
 </template>
 
 <script>
-import AccountForm from './components/AccountForm.vue';
+import Navigation from './components/Navigation.vue'
 
 export default {
   name: 'App',
-  components: { AccountForm },
-};
+  components: {
+    Navigation
+  }
+}
 </script>
 
 <style>
 body {
   font-family: sans-serif;
 }
-header {
-  text-align: center;
-  padding: 1rem;
-  background-color: #f4f4f4;
-  margin-bottom: 2rem;
+
+/* Make sure content is pushed down below the fixed nav (adjust height to match your nav) */
+.main-content {
+  margin-top: 64px;
 }
 </style>
