@@ -1,16 +1,9 @@
-<!-- src/components/RegisterVehicle.vue -->
 <template>
-
-  <AuthFields
-      v-model:username="username"
-      v-model:password="password"
-  />
 
   <div class="form-container" style="margin-top: 80px;">
     <h2>Register Vehicle</h2>
     <form @submit.prevent="submitForm">
       <div class="form-group">
-        <label for="registrationCode">Registration Code</label>
         <input
             id="registrationCode"
             type="text"
@@ -27,7 +20,6 @@
             v-model="validUntil"
             required
         />
-        <label for="validUntil">Valid Until</label>
       </div>
 
       <button type="submit">Submit</button>
@@ -37,17 +29,17 @@
 </template>
 
 <script>
-import AuthFields from './AuthFields.vue'
+import Authorization from './Authorization.vue'
 import axios from 'axios'
 
 export default {
   name: 'RegisterVehicle',
   components: {
-    AuthFields
+    AuthFields: Authorization
   },
   data() {
     return {
-      // Bound via AuthFields.vue
+      // Bound via Authorization.vue
       username: '',
       password: '',
       // Vehicle fields
@@ -59,10 +51,10 @@ export default {
   },
   methods: {
     async submitForm() {
+      const storedUsername = localStorage.getItem("username");
+      const storedPassword = localStorage.getItem("password");
       const apiHost = import.meta.env.VITE_API_BASE_URL
-      const credentials = btoa(`${this.username}:${this.password}`)
-      console.log("Username: " + this.username)
-      console.log("password: " + this.password)
+      const credentials = btoa(`${storedUsername}:${storedPassword}`)
 
       const payload = {
         registrationCode: this.registrationCode,
@@ -86,8 +78,10 @@ export default {
       } catch (err) {
 
         if (err.response && err.response.data && err.response.data.description) {
-          this.message = err.response.data.description;
-        } else {
+          this.message = err.response.data.description
+        } else if (err.response.data.error) {
+          this.message = err.response.data.error
+        } else{
           this.message = err.message;
         }
         this.messageType = "error";
