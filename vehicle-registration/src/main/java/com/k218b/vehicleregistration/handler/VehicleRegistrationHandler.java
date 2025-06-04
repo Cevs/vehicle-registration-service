@@ -38,7 +38,7 @@ public class VehicleRegistrationHandler extends JsonHandler<VehicleRegistrationR
 		vehicleRegistrationService.addVehicleRegistration(registrationCode, DateUtil.parseIsoDate(request.validUntil()));
 
 		return new VehicleRegistrationCreationResponse(true,
-													   "Vehicle registration: %s already exists in the system!".formatted(request.registrationCode()));
+													   "Vehicle registration for: %s is successfully added!".formatted(request.registrationCode()));
 
 	}
 
