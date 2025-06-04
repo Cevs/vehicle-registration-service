@@ -5,6 +5,10 @@ import RegisterVehicle from "./components/RegisterVehicle.vue";
 
 const routes = [
     {
+        path: '/',
+        redirect: '/create-account',
+    },
+    {
         path: '/create-account',
         name: 'CreateAccount',
         component: AccountForm
