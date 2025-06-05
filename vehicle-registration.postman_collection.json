@@ -35,12 +35,12 @@
 					}
 				},
 				"url": {
-					"raw": "http://localhost:8081/account",
+					"raw": "http://localhost:9090/account",
 					"protocol": "http",
 					"host": [
 						"localhost"
 					],
-					"port": "8081",
+					"port": "9090",
 					"path": [
 						"account"
 					]
@@ -78,12 +78,12 @@
 					}
 				},
 				"url": {
-					"raw": "http://localhost:8080/register",
+					"raw": "http://localhost:9090/register",
 					"protocol": "http",
 					"host": [
 						"localhost"
 					],
-					"port": "8080",
+					"port": "9090",
 					"path": [
 						"register"
 					]
@@ -102,12 +102,12 @@
 					"basic": [
 						{
 							"key": "password",
-							"value": "1234",
+							"value": "{{user_password}}",
 							"type": "string"
 						},
 						{
 							"key": "username",
-							"value": "test@gmail.com",
+							"value": "{{username}}",
 							"type": "string"
 						}
 					]
@@ -124,12 +124,12 @@
 					}
 				},
 				"url": {
-					"raw": "http://localhost:8080/statistics/accountID",
+					"raw": "http://localhost:90909/statistics/accountID",
 					"protocol": "http",
 					"host": [
 						"localhost"
 					],
-					"port": "8080",
+					"port": "90909",
 					"path": [
 						"statistics",
 						"accountID"
@@ -145,13 +145,13 @@
 					"type": "basic",
 					"basic": [
 						{
-							"key": "password",
-							"value": "{{user_password}}",
+							"key": "username",
+							"value": "{{username}}",
 							"type": "string"
 						},
 						{
-							"key": "username",
-							"value": "{{username}}",
+							"key": "password",
+							"value": "{{user_password}}",
 							"type": "string"
 						}
 					]
@@ -165,12 +165,12 @@
 					}
 				],
 				"url": {
-					"raw": "http://localhost:8080/registration/registrationCode",
+					"raw": "http://localhost:9090/registration/registrationCode",
 					"protocol": "http",
 					"host": [
 						"localhost"
 					],
-					"port": "8080",
+					"port": "9090",
 					"path": [
 						"registration",
 						"registrationCode"
