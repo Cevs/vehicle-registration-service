@@ -43,7 +43,7 @@ docker-compose up -d
 [http://localhost:8080](http://localhost:8080)
 
 ## 5. Postman collection
-Postman colleciton can be found under root folder. Feel free to import and use it.
-Global variables for username and user_password are configured
-Only username has to be defined. 
-user_password variable will be automatically populated via script after successful user registration
+Postman colleciton can be found under root folder. Feel free to import and use it. <br/>
+Global variables for **username** and **user_password** are configured <br/>
+Only **username** has to be defined. <br/>
+**user_password** variable will be automatically populated via script after successful user registration
