@@ -1,0 +1,23 @@
+version: '3.8'
+
+services:
+  backend:
+    container_name: backend
+    build:
+      context: ./vehicle-registration
+      dockerfile: Dockerfile
+    ports:
+      - "8081:9090"
+    volumes:
+      - backend_data:/app/data
+
+  frontend:
+    container_name: frontend
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+    ports:
+      - "8080:80"
+
+volumes:
+  backend_data:
