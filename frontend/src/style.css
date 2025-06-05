@@ -139,6 +139,55 @@ input[type="date"] {
   margin-top: 1rem;
 }
 
+.success-message {
+  display: grid;
+  grid-template-columns: auto auto;
+  column-gap: 20px;
+  row-gap: 6px;
+
+  background-color: #e6f9e6;
+  color: #256d25;
+  padding: 10px;
+  border-radius: 4px;
+  font-size: 0.9rem;
+}
+
+.success-message .message {
+  font-size: 16px;
+  grid-column: 1 / -1;
+  margin: 5px;
+  font-weight: bold;
+}
+
+.success-message .label,
+.success-message .value {
+  margin: 0;
+  font-size: 14px;
+}
+
+.error-display {
+  margin-top: 10px;
+}
+
+.error-message {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  width: 100%;
+  background-color: #f8d7da;
+  color: #842029;
+  padding: 8px;
+  border-radius: 4px;
+  font-size: 0.9rem;
+}
+
+.error-message .message {
+  width: 100%;
+  margin: 0;
+  text-align: center;
+  font-weight: bold;
+}
+
 @media (prefers-color-scheme: light) {
   :root {
     color: #213547;

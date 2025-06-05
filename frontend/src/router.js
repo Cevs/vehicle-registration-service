@@ -3,6 +3,7 @@ import { createRouter, createWebHistory } from 'vue-router'
 import AccountForm from './components/AccountForm.vue'
 import RegisterVehicle from "./components/RegisterVehicle.vue";
 import VehicleRegistrationStatistics from "./components/VehicleRegistrationStatistics.vue";
+import VehicleRegistration from "./components/VehicleRegistration.vue";
 
 const routes = [
     {
@@ -23,6 +24,11 @@ const routes = [
         path: '/statistics',
         name: 'VehicleRegistrationStatistics',
         component: VehicleRegistrationStatistics
+    },
+    {
+        path: '/registration',
+        name: 'VehicleRegistration',
+        component: VehicleRegistration
     }
 ]
 

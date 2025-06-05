@@ -16,6 +16,11 @@
           Statistics
         </router-link>
       </li>
+      <li class="nav-item">
+        <router-link to="/registration" class="nav-link">
+          Registration
+        </router-link>
+      </li>
     </ul>
 
     <div class="auth-container">

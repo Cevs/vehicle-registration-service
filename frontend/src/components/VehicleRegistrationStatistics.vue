@@ -1,4 +1,3 @@
-<!-- src/components/VehicleStatistics.vue -->
 <template>
   <div class="container">
     <h2>Account Vehicle Registrations</h2>

@@ -2,12 +2,26 @@
   <div class="form-container">
     <h2>Create Account</h2>
     <form @submit.prevent="createAccount">
-      <input id="accountId" v-model="accountId" type="email" placeholder="you@example.com" required>
+      <input
+          id="accountId"
+          v-model="accountId"
+          type="email"
+          placeholder="you@example.com"
+          required
+      >
       <button type="submit">Create</button>
     </form>
-    <p v-if="message" :class="messageType">{{ message }}</p>
-  </div>
 
+    <!-- Success message: use v-html so only the password part is bold -->
+    <div v-if="messageType === 'success'" class="success-message">
+      <p class="message" v-html="message"></p>
+    </div>
+
+    <!-- Error message (unchanged) -->
+    <div v-if="messageType === 'error'" class="error-message">
+      <p class="message">{{ message }}</p>
+    </div>
+  </div>
 </template>
 
 <script>
@@ -19,16 +33,15 @@ export default {
     return {
       accountId: '',
       message: '',
-      messageType: '' // "success" or "error"
-    }
+      messageType: ''
+    };
   },
   methods: {
     async createAccount() {
-      // Clear previous messages
+      // Reset previous messages
       this.message = '';
       this.messageType = '';
 
-      // Trim and validate
       const id = this.accountId.trim();
       if (!id) {
         this.messageType = 'error';
@@ -37,8 +50,6 @@ export default {
       }
 
       try {
-        // Send JSON: { accountId: "user@example.com" }
-        console.log("id:" + id)
         const response = await axios.post(
             `${import.meta.env.VITE_API_BASE_URL || ''}/account`,
             { accountId: id },
@@ -47,25 +58,55 @@ export default {
             }
         );
 
-        // If your backend returns something like { success: true, password: "..." }
         if (response.data && response.data.password) {
           this.messageType = 'success';
-          this.message = `Account created! Your password is: ${response.data.password}`;
+          // Wrap only the password in <strong>…</strong>
+          this.message = `${response.data.message} Your password is: <strong>${response.data.password}</strong>`;
         } else {
-          // If your backend returns { success: false, message: "..." }
           this.messageType = 'error';
-          this.message = response.data.message || 'Unexpected response';
+          this.message = response.data.message || 'Unexpected response from the server.';
         }
       } catch (err) {
-        // Handle errors (e.g. 400/409 with JSON { error: "..." })
         this.messageType = 'error';
-        this.message = err.response.data.message;
+
+        if (err.response && err.response.status === 409) {
+          this.message = err.response.data && err.response.data.message
+              ? err.response.data.message
+              : 'An account with that email already exists.';
+        }
+        else if (err.response && err.response.data && err.response.data.message) {
+          this.message = err.response.data.message;
+        }
+        else {
+          this.message = err.message;
+        }
       }
     }
   }
-}
+};
 </script>
 
-<style>
+<style scoped>
 
+.success-message {
+  background-color: #e6f9e6;
+  color: #256d25;
+  padding: 10px;
+  margin-top: 15px;
+  border-radius: 4px;
+}
+
+.error-message {
+  background-color: #f8d7da;
+  color: #842029;
+  padding: 10px;
+  margin-top: 15px;
+  border-radius: 4px;
+}
+
+.success-message .message,
+.error-message .message {
+  margin: 0;
+  font-weight: normal !important;
+}
 </style>

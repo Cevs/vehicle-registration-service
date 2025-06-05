@@ -23,7 +23,18 @@
       </div>
 
       <button type="submit">Submit</button>
-      <p v-if="message" :class="messageType">{{ message }}</p>
+      <div
+          v-if="messageType === 'success'"
+          class="success-message">
+        <p class="message">{{ message }}</p>
+      </div>
+
+      <div
+          v-if="messageType === 'error'"
+          class="error-message error-display">
+        <p class="message">{{ message }}</p>
+      </div>
+
     </form>
   </div>
 </template>
