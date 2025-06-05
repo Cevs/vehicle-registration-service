@@ -5,6 +5,8 @@ import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.SQLException;
 import java.sql.Statement;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 /**
  * Utility for initializing and connecting to an embedded HSQLDB database.
@@ -18,6 +20,7 @@ public class JDBCUtil {
 	private static final String URL = AppConfig.get("db.url");
 	private static final String USER = AppConfig.getOrDefault("db.user", "SA");
 	private static final String PASSWORD = AppConfig.getOrDefault("db.password", "");
+	private static final Logger LOG = Logger.getLogger(JDBCUtil.class.getName());
 
 	private JDBCUtil() {}
 
@@ -61,8 +64,9 @@ public class JDBCUtil {
 			// ignore "table already exists" errors: SQLState 42Y55 or error code -5501
 			String state = e.getSQLState();
 			int code = e.getErrorCode();
+			LOG.log(Level.SEVERE, "Issue with init of db", e);
 			if (!"42Y55".equals(state) && code != -5501) {
-//				throw new RuntimeException("DB init failed", e);
+				throw new RuntimeException("DB init failed", e);
 			}
 		}
 	}

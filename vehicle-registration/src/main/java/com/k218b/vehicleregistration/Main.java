@@ -42,7 +42,7 @@ public class Main {
 	}
 
 	private static void initializeServer() throws IOException {
-		final HttpServer server = HttpServer.create(new InetSocketAddress(8080), 0);
+		final HttpServer server = HttpServer.create(new InetSocketAddress(AppConfig.getInt("app.server.port")), 0);
 
 		final UserDao userDao = new DefaultUserDao();
 		final UserService userService = new DefaultUserService(userDao);

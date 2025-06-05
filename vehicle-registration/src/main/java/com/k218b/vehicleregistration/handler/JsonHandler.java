@@ -50,14 +50,14 @@ public abstract class JsonHandler<T> implements HttpHandler {
 			}
 
 		} catch (BadRequestException e) {
-			LOG.log(Level.WARNING, "Unsupported request received: {0}", e.getMessage());
+			LOG.log(Level.WARNING, "Unsupported request received: {0}", e.toString());
 			sendError(exchange, 400, e.getMessage());
 
 		} catch (DuplicatedModelException e) {
 			sendError(exchange, 409, e.getObject());
 
 		} catch (Exception e) {
-			LOG.log(Level.SEVERE, "Issue occurred while handling request: {0}", e.getMessage());
+			LOG.log(Level.SEVERE, "Issue occurred while handling request: {0}", e.toString());
 			sendError(exchange, 500, "Internal error: %s".formatted(e.getMessage()));
 		}
 	}

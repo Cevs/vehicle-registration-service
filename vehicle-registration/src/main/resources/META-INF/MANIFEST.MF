@@ -1,2 +1,3 @@
 Manifest-Version: 1.0
 Main-Class: com.k218b.vehicleregistration.Main
+Class-Path: lib/hsqldb-2.7.1.jar
