@@ -10,7 +10,7 @@ public class CorsFilter extends Filter {
 	public void doFilter(final HttpExchange exchange, final Chain chain) throws IOException {
 		exchange.getResponseHeaders().add("Access-Control-Allow-Origin", "*");
 		exchange.getResponseHeaders().add("Access-Control-Allow-Methods", "GET, POST, OPTIONS");
-		exchange.getResponseHeaders().add("Access-Control-Allow-Headers", "Content-Type, Authorization");
+		exchange.getResponseHeaders().add("Access-Control-Allow-Headers", "Content-Type, Authorization, Registration-Code");
 
 		if ("OPTIONS".equalsIgnoreCase(exchange.getRequestMethod())) {
 			exchange.sendResponseHeaders(204, -1);

@@ -13,7 +13,7 @@ import java.util.Optional;
 
 public class UserHandler extends JsonHandler<Void, UserVehicleRegistrationResponse>{
 
-	private static final String HEADER_REG_CODE = "registrationCode";
+	private static final String HEADER_REG_CODE = "Registration-Code";
 	private final VehicleRegistrationService vehicleRegistrationService;
 
 	public UserHandler(final VehicleRegistrationService vehicleRegistrationService) {
@@ -33,7 +33,6 @@ public class UserHandler extends JsonHandler<Void, UserVehicleRegistrationRespon
 		}
 		codeFromHeader = codeFromHeader.trim();
 
-		// 4) Look up the registration from the service
 		final Optional<VehicleRegistration> vehicleRegistrationOptional = vehicleRegistrationService.getVehicleRegistration(codeFromHeader);
 		if (vehicleRegistrationOptional.isEmpty()) {
 			return new UserVehicleRegistrationResponse(null,
