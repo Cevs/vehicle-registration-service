@@ -6,6 +6,7 @@
 3. [Run Docker Compose](#3-run-docker-compose)  
 4. [Accessing Application](#4-accessing-application)
 5. [Postman Collection](#5-postman-collection)
+6. [Running jar](#6-running-jar)
 ---
 
 ## 1. Install Docker
@@ -47,3 +48,16 @@ Postman colleciton can be found under root folder. Feel free to import and use i
 Global variables for **username** and **user_password** are configured <br/>
 Only **username** has to be defined. <br/>
 **user_password** variable will be automatically populated via script after successful user registration
+
+### Note
+If app will be run over jar, then in postman collection use port **9090** </br>
+If app will be run via docker, then in postman collection user port **8081**  </br>
+
+## 6. Running Jar
+Unzip the zip file containing jar file and lib folder with db driver </br>
+Install Java **JDK 24** (for easy install use https://sdkman.io/) </br>
+Run following command:
+ ```bash
+java -jar vehicle_registration.jar
+```
+
