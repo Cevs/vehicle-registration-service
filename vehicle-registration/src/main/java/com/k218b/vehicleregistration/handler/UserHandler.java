@@ -1,5 +1,6 @@
 package com.k218b.vehicleregistration.handler;
 
+import com.k218b.vehicleregistration.context.SessionContext;
 import com.k218b.vehicleregistration.exception.BadRequestException;
 import com.k218b.vehicleregistration.model.VehicleRegistration;
 import com.k218b.vehicleregistration.response.UserVehicleRegistrationResponse;
@@ -33,7 +34,7 @@ public class UserHandler extends JsonHandler<Void>{
 		}
 		codeFromHeader = codeFromHeader.trim();
 
-		final Optional<VehicleRegistration> vehicleRegistrationOptional = vehicleRegistrationService.getVehicleRegistration(codeFromHeader);
+		final Optional<VehicleRegistration> vehicleRegistrationOptional = vehicleRegistrationService.getVehicleRegistrationForUser(codeFromHeader, SessionContext.getCurrentUser());
 		if (vehicleRegistrationOptional.isEmpty()) {
 			return new UserVehicleRegistrationResponse(null,
 													   I18nUtil.getMessage(Locale.getDefault(), "registration.not.found", codeFromHeader),
