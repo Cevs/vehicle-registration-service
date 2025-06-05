@@ -52,7 +52,7 @@ export default {
 
       try {
         const response = await axios.get(
-            `${apiHost}/statistics/accountID`,
+            "/statistics/accountID",
             {
               headers: {
                 "Content-Type": "application/json",

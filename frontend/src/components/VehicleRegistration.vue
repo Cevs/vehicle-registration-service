@@ -61,8 +61,7 @@ export default {
 
       try {
         const response = await axios.get(
-            // Adjust path if needed, e.g. `${apiHost}/registration/${this.registrationCode}`
-            `${apiHost}/registration/registrationCode`,
+            "/registration/registrationCode",
             {
               headers: {
                 "Content-Type": "application/json",

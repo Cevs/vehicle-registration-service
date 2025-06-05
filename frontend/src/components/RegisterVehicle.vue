@@ -73,7 +73,7 @@ export default {
       }
 
       try {
-        const response = await axios.post(`${apiHost}/register`, payload, {
+        const response = await axios.post("/register", payload, {
           headers: {
             "Content-Type": "application/json",
             Authorization: `Basic ${credentials}`,

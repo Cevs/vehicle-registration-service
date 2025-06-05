@@ -51,7 +51,7 @@ export default {
 
       try {
         const response = await axios.post(
-            `${import.meta.env.VITE_API_BASE_URL || ''}/account`,
+            "/account",
             { accountId: id },
             {
               headers: { 'Content-Type': 'application/json' }
