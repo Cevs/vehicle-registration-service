@@ -2,6 +2,7 @@ package com.k218b.vehicleregistration.handler;
 
 import com.k218b.vehicleregistration.exception.BadRequestException;
 import com.k218b.vehicleregistration.exception.DuplicatedModelException;
+import com.k218b.vehicleregistration.response.HttpResponse;
 import com.k218b.vehicleregistration.util.JsonUtil;
 import com.sun.net.httpserver.HttpExchange;
 import com.sun.net.httpserver.HttpHandler;
@@ -12,7 +13,7 @@ import java.nio.charset.StandardCharsets;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
-public abstract class JsonHandler<T, R> implements HttpHandler {
+public abstract class JsonHandler<T> implements HttpHandler {
 
 	private static final Logger LOG = Logger.getLogger(JsonHandler.class.getName());
 	public static final String CONTENT_TYPE_HEADER_NAME = "Content-Type";
@@ -35,20 +36,14 @@ public abstract class JsonHandler<T, R> implements HttpHandler {
 			}
 
 			// 2) Delegate to subclass
-			final R responseObject = handleRequest(exchange, requestObject);
+			final HttpResponse responseObject = handleRequest(exchange, requestObject);
 
 			// 3) Serialize response
-			byte[] respBytes = JsonUtil.toJson(responseObject)
-									   .getBytes(StandardCharsets.UTF_8);
+			final byte[] respBytes = JsonUtil.toJson(responseObject)
+											 .getBytes(StandardCharsets.UTF_8);
 			exchange.getResponseHeaders()
 					.add(CONTENT_TYPE_HEADER_NAME, CONTENT_TYPE_HEADER_VALUE + "; charset=UTF-8");
-
-			String method = exchange.getRequestMethod();
-			if ("POST".equalsIgnoreCase(method) || "PUT".equalsIgnoreCase(method)) {
-				exchange.sendResponseHeaders(201, respBytes.length);
-			} else {
-				exchange.sendResponseHeaders(200, respBytes.length);
-			}
+			exchange.sendResponseHeaders(responseObject.getHttpResponse(), respBytes.length);
 
 			try (OutputStream out = exchange.getResponseBody()) {
 				out.write(respBytes);
@@ -87,5 +82,5 @@ public abstract class JsonHandler<T, R> implements HttpHandler {
 	}
 
 	/** Subclasses implement this. */
-	protected abstract R handleRequest(HttpExchange exchange, T request);
+	protected abstract HttpResponse handleRequest(HttpExchange exchange, T request);
 }

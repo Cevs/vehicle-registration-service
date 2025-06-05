@@ -11,7 +11,7 @@ import java.time.LocalDate;
 import java.util.Locale;
 import java.util.Optional;
 
-public class UserHandler extends JsonHandler<Void, UserVehicleRegistrationResponse>{
+public class UserHandler extends JsonHandler<Void>{
 
 	private static final String HEADER_REG_CODE = "Registration-Code";
 	private final VehicleRegistrationService vehicleRegistrationService;
@@ -36,7 +36,8 @@ public class UserHandler extends JsonHandler<Void, UserVehicleRegistrationRespon
 		final Optional<VehicleRegistration> vehicleRegistrationOptional = vehicleRegistrationService.getVehicleRegistration(codeFromHeader);
 		if (vehicleRegistrationOptional.isEmpty()) {
 			return new UserVehicleRegistrationResponse(null,
-													   I18nUtil.getMessage(Locale.getDefault(), "registration.not.found", codeFromHeader));
+													   I18nUtil.getMessage(Locale.getDefault(), "registration.not.found", codeFromHeader),
+													   404);
 		}
 
 		final VehicleRegistration vehicleRegistration = vehicleRegistrationOptional.get();
@@ -45,7 +46,7 @@ public class UserHandler extends JsonHandler<Void, UserVehicleRegistrationRespon
 		final String messageKey = validUntilDate.isBefore(now) ? "registration.expired" : "registration.valid";
 		final String message = I18nUtil.getMessage(Locale.getDefault(), messageKey);
 
-		return new UserVehicleRegistrationResponse(DateUtil.formatIsoDate(validUntilDate), message);
+		return new UserVehicleRegistrationResponse(DateUtil.formatIsoDate(validUntilDate), message, 200);
 
 	}
 

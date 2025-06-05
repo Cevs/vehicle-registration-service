@@ -10,7 +10,7 @@ import com.k218b.vehicleregistration.util.DateUtil;
 import com.sun.net.httpserver.HttpExchange;
 import java.util.Optional;
 
-public class VehicleRegistrationHandler extends JsonHandler<VehicleRegistrationRequest, VehicleRegistrationCreationResponse> {
+public class VehicleRegistrationHandler extends JsonHandler<VehicleRegistrationRequest> {
 
 	private final VehicleRegistrationService vehicleRegistrationService;
 
@@ -31,14 +31,16 @@ public class VehicleRegistrationHandler extends JsonHandler<VehicleRegistrationR
 		if (vehicleRegistrationOptional.isPresent()) {
 			final var vehicleRegistrationResponse =
 					new VehicleRegistrationCreationResponse(false,
-															"Provided vehicle registration code: %s already exists.".formatted(request.registrationCode()));
+															"Provided vehicle registration code: %s already exists.".formatted(request.registrationCode()),
+															409);
 			throw new DuplicatedModelException(vehicleRegistrationResponse);
 		}
 
 		vehicleRegistrationService.addVehicleRegistration(registrationCode, DateUtil.parseIsoDate(request.validUntil()));
 
 		return new VehicleRegistrationCreationResponse(true,
-													   "Vehicle registration for: %s is successfully added!".formatted(request.registrationCode()));
+													   "Vehicle registration for: %s is successfully added!".formatted(request.registrationCode()),
+													   201);
 
 	}
 

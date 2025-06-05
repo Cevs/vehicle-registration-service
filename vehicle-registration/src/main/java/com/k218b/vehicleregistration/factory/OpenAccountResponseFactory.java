@@ -18,6 +18,7 @@ public abstract class OpenAccountResponseFactory {
 								  .success(true)
 								  .message(msg)
 								  .password(password)
+								  .statusCode(201)
 								  .build();
 	}
 
@@ -27,6 +28,7 @@ public abstract class OpenAccountResponseFactory {
 		return OpenAccountResponse.builder()
 								  .success(false)
 								  .message(msg)
+								  .statusCode(409)
 								  .build();
 	}
 }

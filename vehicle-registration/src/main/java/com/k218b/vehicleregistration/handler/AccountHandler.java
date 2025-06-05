@@ -9,7 +9,7 @@ import com.k218b.vehicleregistration.response.OpenAccountResponse;
 import com.k218b.vehicleregistration.service.UserService;
 import com.sun.net.httpserver.HttpExchange;
 
-public class AccountHandler extends JsonHandler<CreateAccountRequest, OpenAccountResponse> {
+public class AccountHandler extends JsonHandler<CreateAccountRequest> {
 
 	private final UserService userService;
 

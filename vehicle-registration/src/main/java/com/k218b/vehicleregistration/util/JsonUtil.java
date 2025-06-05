@@ -4,6 +4,7 @@ import com.k218b.vehicleregistration.exception.JsonSerializationException;
 import java.io.IOException;
 import java.io.InputStream;
 import java.lang.reflect.Constructor;
+import java.lang.reflect.Field;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.RecordComponent;
 import java.nio.charset.StandardCharsets;
@@ -98,16 +99,23 @@ public class JsonUtil {
 			return toJson(map);
 		}
 
-		final StringBuilder sb = new StringBuilder();
-		sb.append("{");
 		final Class<?> clazz = obj.getClass();
 
-		final RecordComponent[] comps = clazz.getRecordComponents();
+		if (clazz.isRecord()) {
+			return parseRecord(clazz, obj);
+		}
+		return parseClass(clazz, obj);
+	}
+
+	public static String parseRecord(Class<?> clazz, Object obj) {
+		final StringBuilder sb = new StringBuilder();
+		sb.append("{");
 		boolean first = true;
 
+		RecordComponent[] comps = clazz.getRecordComponents();
 		for (RecordComponent rc : comps) {
 			try {
-				final Object val = clazz.getMethod(rc.getAccessor().getName()).invoke(obj);
+				Object val = clazz.getMethod(rc.getAccessor().getName()).invoke(obj);
 				if (val != null) {
 					if (!first) {
 						sb.append(",");
@@ -122,10 +130,42 @@ public class JsonUtil {
 				throw new JsonSerializationException(clazz, rc.getName(), e);
 			}
 		}
-
 		sb.append("}");
 		return sb.toString();
 	}
+
+	public static String parseClass(Class<?> clazz, Object obj) {
+		final StringBuilder sb = new StringBuilder();
+		sb.append("{");
+		boolean first = true;
+
+		Field[] fields = clazz.getDeclaredFields();
+		for (Field field : fields) {
+			// Skip static or synthetic fields
+			if (java.lang.reflect.Modifier.isStatic(field.getModifiers()) || field.isSynthetic()) {
+				continue;
+			}
+			field.setAccessible(true);
+			try {
+				Object val = field.get(obj);
+				if (val != null) {
+					if (!first) {
+						sb.append(",");
+					}
+					sb.append("\"")
+					  .append(field.getName())
+					  .append("\":")
+					  .append(quote(val));
+					first = false;
+				}
+			} catch (IllegalAccessException e) {
+				throw new JsonSerializationException(clazz, field.getName(), e);
+			}
+		}
+		sb.append("}");
+		return sb.toString();
+	}
+
 
 	/**
 	 * Serialize a Map&lt;String, ?&gt; to a flat JSON object. Each key is used as a JSON property name
