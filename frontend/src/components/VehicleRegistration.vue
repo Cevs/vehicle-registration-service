@@ -25,6 +25,15 @@
         class="error-message error-display">
       <p class="message">{{ message }}</p>
     </div>
+
+    <div
+        v-if="messageType === 'warning'"
+        class="warning-message vehicle-registration-validation">
+      <p class="message">{{ message }}</p>
+      <p class="label">Valid Until:</p>
+      <p class="value">{{ validUntil }}</p>
+    </div>
+
   </div>
 </template>
 
@@ -62,10 +71,15 @@ export default {
               },
             }
         );
-
-        this.messageType = "success";
-        this.validUntil = response.data.validUntil;
         this.message = response.data.message;
+        if(this.message.includes("expired")) {
+          this.messageType = "warning";
+        } else {
+          this.messageType = "success";
+        }
+
+        this.validUntil = response.data.validUntil;
+
       } catch (err) {
         if (
             err.response &&
